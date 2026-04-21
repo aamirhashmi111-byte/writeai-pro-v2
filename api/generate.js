@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         'X-Title': 'WriteAI Pro'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        model: 'mistralai/mistral-7b-instruct:free',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 2000,
         temperature: 0.8
