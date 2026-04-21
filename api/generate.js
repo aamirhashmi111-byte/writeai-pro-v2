@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         'X-Title': 'WriteAI Pro'
       },
       body: JSON.stringify({
-        model: 'mistralai/mistral-7b-instruct:free',
+        model: 'openrouter/auto',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 2000,
         temperature: 0.8
