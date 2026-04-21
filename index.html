@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WriteAI Pro — AI Content Writer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #ffffff0f;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0f8;
+    --muted: #8888a8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,101,132,0.09) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(16px);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo em {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-style: normal;
+  }
+  .badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px; letter-spacing: 0.5px;
+  }
+  .status-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(67,233,123,0.1);
+    border: 1px solid rgba(67,233,123,0.2);
+    color: var(--accent3);
+    font-size: 12px; font-weight: 500;
+    padding: 6px 14px; border-radius: 100px;
+  }
+  .status-pill .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  /* MAIN */
+  .main {
+    position: relative; z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -1.5px; margin-bottom: 14px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+  /* STATS */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.05s ease both;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; text-align: center;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* TABS */
+  .tab-nav {
+    display: flex; gap: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 6px; margin-bottom: 28px;
+    overflow-x: auto; scrollbar-width: none;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1; min-width: 120px;
+    background: none; border: none; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 10px 16px; border-radius: 9px; cursor: pointer;
+    white-space: nowrap; display: flex; align-items: center;
+    justify-content: center; gap: 7px; transition: all 0.22s;
+  }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .tab.active {
+    background: linear-gradient(135deg, var(--accent), #5b52e8);
+    color: #fff; box-shadow: 0 4px 18px rgba(108,99,255,0.35);
+  }
+
+  /* GRID */
+  .app-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; animation: fadeUp 0.6s 0.15s ease both;
+  }
+  @media(max-width: 720px) { .app-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .panel-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title {
+    font-family: 'Syne', sans-serif; font-size: 14px;
+    font-weight: 700; letter-spacing: 0.3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-body { padding: 20px; }
+
+  /* FORM */
+  label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 7px;
+  }
+  input[type="text"], textarea, select {
+    width: 100%; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; padding: 11px 14px; outline: none;
+    transition: border-color 0.2s; resize: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent); background: rgba(108,99,255,0.06);
+  }
+  input[type="text"]::placeholder, textarea::placeholder { color: var(--muted); }
+  select option { background: #1a1a28; }
+  .form-row { margin-bottom: 16px; }
+
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .slider-row input[type="range"] {
+    flex: 1; padding: 0; background: none; border: none;
+    -webkit-appearance: auto; appearance: auto; accent-color: var(--accent);
+  }
+  .slider-val { font-size: 13px; color: var(--accent); font-weight: 600; min-width: 60px; text-align: right; }
+
+  /* GEN BUTTON */
+  .gen-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, #5b52e8 50%, var(--accent2) 100%);
+    border: none; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    padding: 15px; border-radius: 12px; cursor: pointer;
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .gen-btn:hover { box-shadow: 0 8px 28px rgba(108,99,255,0.45); transform: translateY(-1px); }
+  .gen-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .gen-btn .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* OUTPUT */
+  .output-panel {
+    grid-column: 1 / -1; background: var(--card);
+    border: 1px solid var(--border); border-radius: 16px;
+    overflow: hidden; display: none;
+  }
+  .output-panel.show { display: block; animation: fadeUp 0.4s ease both; }
+  .output-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .output-title {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .output-actions { display: flex; gap: 8px; }
+  .action-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; padding: 7px 14px; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
+  .action-btn.success { background: rgba(67,233,123,0.15); border-color: var(--accent3); color: var(--accent3); }
+
+  .output-content {
+    padding: 24px; white-space: pre-wrap; font-size: 14.5px;
+    line-height: 1.75; color: #e0e0f0; min-height: 200px;
+    max-height: 480px; overflow-y: auto;
+  }
+  .output-content::-webkit-scrollbar { width: 6px; }
+  .output-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .output-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px; color: var(--muted);
+  }
+  .wc-badge {
+    background: rgba(108,99,255,0.15); color: var(--accent);
+    padding: 2px 8px; border-radius: 100px; font-weight: 600;
+  }
+
+  /* HISTORY */
+  .history-section { margin-top: 32px; animation: fadeUp 0.6s 0.2s ease both; }
+  .history-title {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .history-item:hover { border-color: var(--accent); background: rgba(108,99,255,0.06); }
+  .history-item-type { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+  .history-item-topic { font-size: 13px; color: var(--text); }
+  .history-item-time { font-size: 11px; color: var(--muted); }
+  .no-history { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 30px; right: 30px;
+    background: var(--accent3); color: #0a2a15;
+    font-weight: 600; font-size: 13px; padding: 12px 20px;
+    border-radius: 10px; z-index: 200;
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2s forwards;
+    box-shadow: 0 6px 24px rgba(67,233,123,0.35);
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo"><em>WriteAI</em> Pro</div>
+    <div class="badge">v2.0</div>
+  </div>
+  <div class="status-pill"><div class="dot"></div> AI Ready</div>
+</header>
+
+<div class="main">
+
+  <div class="hero">
+    <h1>Write Anything with<br><span class="grad">AI in Seconds</span></h1>
+    <p>Blogs, ads, social posts, emails — generate professional content instantly. No setup needed.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="totalGen">0</div>
+      <div class="stat-lbl">Content Generated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="totalWords">0</div>
+      <div class="stat-lbl">Total Words Written</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">8</div>
+      <div class="stat-lbl">Content Types</div>
+    </div>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab active" onclick="switchTab('blog',this)"><span>📝</span> Blog Post</button>
+    <button class="tab" onclick="switchTab('ad',this)"><span>📢</span> Ad Copy</button>
+    <button class="tab" onclick="switchTab('social',this)"><span>📱</span> Social Media</button>
+    <button class="tab" onclick="switchTab('email',this)"><span>✉️</span> Email</button>
+    <button class="tab" onclick="switchTab('product',this)"><span>🛍️</span> Product Desc</button>
+    <button class="tab" onclick="switchTab('youtube',this)"><span>🎬</span> YouTube</button>
+    <button class="tab" onclick="switchTab('seo',this)"><span>🔍</span> SEO Meta</button>
+    <button class="tab" onclick="switchTab('tagline',this)"><span>💡</span> Tagline</button>
+  </div>
+
+  <div class="app-grid">
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span id="panelIcon">📝</span> <span id="panelName">Blog Post Generator</span></div>
+      </div>
+      <div class="panel-body" id="inputArea"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">⚙️ Settings</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-row">
+          <label>Tone</label>
+          <select id="tone">
+            <option value="professional">Professional</option>
+            <option value="casual">Casual & Friendly</option>
+            <option value="persuasive">Persuasive</option>
+            <option value="humorous">Humorous</option>
+            <option value="formal">Formal</option>
+            <option value="inspirational">Inspirational</option>
+            <option value="bold">Bold & Direct</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Language</label>
+          <select id="lang">
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Hinglish">Hinglish</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Portuguese">Portuguese</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Output Length</label>
+          <div class="slider-row">
+            <input type="range" id="lengthSlider" min="100" max="1000" step="50" value="300" oninput="updateSlider(this)">
+            <div class="slider-val" id="sliderVal">~300 words</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Creativity</label>
+          <select id="creativity">
+            <option value="balanced">Balanced</option>
+            <option value="conservative">Conservative</option>
+            <option value="creative">Creative</option>
+            <option value="very creative">Very Creative</option>
+          </select>
+        </div>
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          <span>✨</span> Generate Content
+        </button>
+      </div>
+    </div>
+
+    <div class="output-panel" id="outputPanel">
+      <div class="output-header">
+        <div class="output-title">🎉 Generated Content</div>
+        <div class="output-actions">
+          <button class="action-btn" id="copyBtn" onclick="copyContent()">📋 Copy</button>
+          <button class="action-btn" onclick="downloadContent()">⬇️ Download</button>
+          <button class="action-btn" onclick="generate()">🔄 Regenerate</button>
+        </div>
+      </div>
+      <div class="output-content" id="outputContent"></div>
+      <div class="output-footer">
+        <div>Words: <span class="wc-badge" id="wcBadge">0</span></div>
+        <div id="genTime" style="color:var(--muted);font-size:12px"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="history-section">
+    <div class="history-title">🕘 Recent History <span style="font-size:11px;font-weight:400">(click to reload)</span></div>
+    <div class="history-list" id="historyList">
+      <div class="no-history">No content generated yet. Start writing! ✨</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentTab = 'blog';
+let history = JSON.parse(localStorage.getItem('writeai_history') || '[]');
+let stats = JSON.parse(localStorage.getItem('writeai_stats') || '{"gen":0,"words":0}');
+let lastOutput = '';
+
+const tabs = {
+  blog: {
+    icon: '📝', name: 'Blog Post Generator',
+    fields: [
+      { id: 'topic', label: 'Blog Topic', type: 'text', placeholder: 'e.g. 10 Ways to Grow Your Business with AI' },
+      { id: 'audience', label: 'Target Audience', type: 'text', placeholder: 'e.g. Small business owners, marketers' },
+      { id: 'keywords', label: 'Keywords (optional)', type: 'text', placeholder: 'e.g. AI tools, automation, productivity' },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro, an expert content writer. Write a compelling blog post in ${lang} with a ${tone} tone.\nTopic: ${f.topic}\nTarget Audience: ${f.audience}\nKeywords: ${f.keywords || 'none'}\nLength: ~${len} words\nInclude: catchy headline, introduction, 3-5 main points with subheadings, conclusion with CTA.`
+  },
+  ad: {
+    icon: '📢', name: 'Ad Copy Generator',
+    fields: [
+      { id: 'product', label: 'Product / Service', type: 'text', placeholder: 'e.g. AI Writing Tool for Marketers' },
+      { id: 'benefit', label: 'Main Benefit', type: 'text', placeholder: 'e.g. Write 10x faster with AI' },
+      { id: 'platform', label: 'Ad Platform', type: 'select', options: ['Facebook / Instagram','Google Ads','LinkedIn','Twitter / X','TikTok','YouTube'] },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro, an expert copywriter. Create high-converting ad copy in ${lang} with a ${tone} tone.\nProduct: ${f.product}\nMain Benefit: ${f.benefit}\nPlatform: ${f.platform}\nGenerate 3 different ad variations with headlines, body copy, and strong CTA. Keep each under ${len} words.`
+  },
+  social: {
+    icon: '📱', name: 'Social Media Post Generator',
+    fields: [
+      { id: 'topic', label: 'Post Topic / Idea', type: 'text', placeholder: 'e.g. Launching our new AI tool' },
+      { id: 'platform2', label: 'Platform', type: 'select', options: ['Instagram','Twitter / X','LinkedIn','Facebook','Threads','Pinterest'] },
+      { id: 'cta', label: 'Call to Action', type: 'text', placeholder: 'e.g. Link in bio, Comment below' },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro. Write engaging social media posts in ${lang} with a ${tone} tone.\nTopic: ${f.topic}\nPlatform: ${f.platform2}\nCTA: ${f.cta || 'none'}\nCreate 3 different post variations with relevant emojis and hashtags. Optimized for ${f.platform2}.`
+  },
+  email: {
+    icon: '✉️', name: 'Email Writer',
+    fields: [
+      { id: 'subject', label: 'Email Subject / Purpose', type: 'text', placeholder: 'e.g. Welcome email for new subscribers' },
+      { id: 'recipient', label: 'Recipient Type', type: 'text', placeholder: 'e.g. New customers, Cold leads' },
+      { id: 'goal', label: 'Email Goal', type: 'select', options: ['Build trust','Promote offer','Welcome new user','Follow up','Re-engage','Announce launch'] },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro. Write a professional email in ${lang} with a ${tone} tone.\nSubject/Purpose: ${f.subject}\nRecipient: ${f.recipient}\nGoal: ${f.goal}\nInclude: compelling subject line, greeting, body (~${len} words), and strong CTA.`
+  },
+  product: {
+    icon: '🛍️', name: 'Product Description',
+    fields: [
+      { id: 'pname', label: 'Product Name', type: 'text', placeholder: 'e.g. WriteAI Pro — AI Content Writer' },
+      { id: 'features', label: 'Key Features', type: 'textarea', placeholder: 'e.g. 8 content types, multilingual, tone control...' },
+      { id: 'price', label: 'Price / Offer', type: 'text', placeholder: 'e.g. One-time deal at $49' },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro. Write a compelling product description in ${lang} with a ${tone} tone.\nProduct: ${f.pname}\nFeatures: ${f.features}\nPrice: ${f.price || 'not specified'}\nInclude: hook, key benefits, social proof angle, urgency CTA. About ${len} words.`
+  },
+  youtube: {
+    icon: '🎬', name: 'YouTube Content',
+    fields: [
+      { id: 'ytopic', label: 'Video Topic', type: 'text', placeholder: 'e.g. How to use AI to write blog posts' },
+      { id: 'ychannel', label: 'Channel Niche', type: 'text', placeholder: 'e.g. Marketing, Tech, Finance' },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro. Create YouTube content in ${lang} with a ${tone} tone.\nTopic: "${f.ytopic}"\nChannel niche: ${f.ychannel}\nGenerate:\n1. 5 catchy video title ideas\n2. SEO-optimized description (~${len} words)\n3. 10 relevant tags\n4. Script outline with timestamps`
+  },
+  seo: {
+    icon: '🔍', name: 'SEO Meta Writer',
+    fields: [
+      { id: 'page', label: 'Page / Article Title', type: 'text', placeholder: 'e.g. Best AI Tools for Content Writers 2025' },
+      { id: 'seokw', label: 'Target Keywords', type: 'text', placeholder: 'e.g. AI writing tools, content writer AI' },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro, an SEO expert. Write SEO-optimized meta content in ${lang}.\nPage: ${f.page}\nKeywords: ${f.seokw}\nGenerate:\n1. SEO Title (under 60 chars) — 3 variations\n2. Meta Description (under 155 chars) — 3 variations\n3. H1 suggestions — 3 options\n4. Intro paragraph (~${Math.min(len,150)} words)\n5. 10 LSI keywords`
+  },
+  tagline: {
+    icon: '💡', name: 'Tagline & Slogan Generator',
+    fields: [
+      { id: 'brand', label: 'Brand / Product Name', type: 'text', placeholder: 'e.g. WriteAI Pro' },
+      { id: 'what', label: 'What it does', type: 'text', placeholder: 'e.g. AI-powered content writing tool' },
+      { id: 'feel', label: 'Brand Feeling', type: 'select', options: ['Professional','Fun & Playful','Trustworthy','Innovative','Luxury','Bold','Minimal'] },
+    ],
+    prompt: (f, tone, lang, len) => `You are WriteAI Pro. Generate creative taglines in ${lang} for:\nBrand: ${f.brand}\nDescription: ${f.what}\nBrand feeling: ${f.feel}\nGenerate:\n1. 10 short punchy taglines (under 6 words)\n2. 5 longer slogans (6-12 words)\n3. 3 taglines in question format\n4. 3 action-based taglines`
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  switchTab('blog', document.querySelector('.tab.active'));
+  updateStats();
+  renderHistory();
+});
+
+function switchTab(tabId, btn) {
+  currentTab = tabId;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const cfg = tabs[tabId];
+  document.getElementById('panelIcon').textContent = cfg.icon;
+  document.getElementById('panelName').textContent = cfg.name;
+  buildForm(cfg.fields);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function buildForm(fields) {
+  const area = document.getElementById('inputArea');
+  area.innerHTML = fields.map(f => {
+    if (f.type === 'textarea') return `<div class="form-row"><label>${f.label}</label><textarea id="${f.id}" rows="3" placeholder="${f.placeholder}"></textarea></div>`;
+    if (f.type === 'select') return `<div class="form-row"><label>${f.label}</label><select id="${f.id}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+    return `<div class="form-row"><label>${f.label}</label><input type="text" id="${f.id}" placeholder="${f.placeholder}" /></div>`;
+  }).join('');
+}
+
+function updateSlider(el) {
+  document.getElementById('sliderVal').textContent = `~${el.value} words`;
+}
+
+async function generate() {
+  const cfg = tabs[currentTab];
+  const fields = {};
+  cfg.fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    fields[f.id] = el ? el.value.trim() : '';
+  });
+
+  const firstField = Object.values(fields)[0];
+  if (!firstField) return showToast('Please fill in the required field', 'error');
+
+  const tone = document.getElementById('tone').value;
+  const lang = document.getElementById('lang').value;
+  const len = document.getElementById('lengthSlider').value;
+  const prompt = cfg.prompt(fields, tone, lang, len);
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Generating...';
+
+  const outputPanel = document.getElementById('outputPanel');
+  const outputContent = document.getElementById('outputContent');
+  outputPanel.classList.add('show');
+  outputContent.textContent = '✨ AI is writing your content...';
+
+  const startTime = Date.now();
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    const data = await res.json();
+    if (data.error) { showToast('Error: ' + data.error, 'error'); outputContent.textContent = ''; btn.disabled = false; btn.innerHTML = '<span>✨</span> Generate Content'; return; }
+
+    const text = data.text || '';
+    lastOutput = text;
+    outputContent.textContent = '';
+
+    let i = 0;
+    const speed = text.length > 800 ? 6 : 15;
+    const typeInterval = setInterval(() => {
+      outputContent.textContent += text[i]; i++;
+      if (i >= text.length) {
+        clearInterval(typeInterval);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        document.getElementById('genTime').textContent = `Generated in ${elapsed}s`;
+        const wc = text.split(/\s+/).filter(Boolean).length;
+        document.getElementById('wcBadge').textContent = wc;
+        updateStatsCount(wc);
+        addToHistory(cfg.icon, cfg.name, firstField, text);
+      }
+    }, speed);
+
+  } catch (err) {
+    showToast('Network error. Please try again.', 'error');
+    outputContent.textContent = '';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>✨</span> Generate Content';
+}
+
+function copyContent() {
+  if (!lastOutput) return;
+  navigator.clipboard.writeText(lastOutput).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('success'); btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.classList.remove('success'); btn.textContent = '📋 Copy'; }, 2000);
+  });
+}
+
+function downloadContent() {
+  if (!lastOutput) return;
+  const blob = new Blob([lastOutput], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `writeai-${currentTab}-${Date.now()}.txt`; a.click();
+  showToast('File downloaded!');
+}
+
+function addToHistory(icon, type, topic, content) {
+  const entry = { icon, type, topic, content, time: new Date().toLocaleTimeString() };
+  history.unshift(entry);
+  if (history.length > 10) history.pop();
+  localStorage.setItem('writeai_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!history.length) { list.innerHTML = '<div class="no-history">No content generated yet. Start writing! ✨</div>'; return; }
+  list.innerHTML = history.slice(0, 5).map((h, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <div>
+        <div class="history-item-type">${h.icon} ${h.type}</div>
+        <div class="history-item-topic">${h.topic.slice(0,60)}${h.topic.length>60?'…':''}</div>
+      </div>
+      <div class="history-item-time">${h.time}</div>
+    </div>`).join('');
+}
+
+function loadHistory(i) {
+  const h = history[i]; lastOutput = h.content;
+  const panel = document.getElementById('outputPanel'); panel.classList.add('show');
+  document.getElementById('outputContent').textContent = h.content;
+  const wc = h.content.split(/\s+/).filter(Boolean).length;
+  document.getElementById('wcBadge').textContent = wc;
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateStats() {
+  document.getElementById('totalGen').textContent = stats.gen;
+  document.getElementById('totalWords').textContent = stats.words >= 1000 ? (stats.words/1000).toFixed(1)+'K' : stats.words;
+}
+
+function updateStatsCount(wc) {
+  stats.gen++; stats.words += wc;
+  localStorage.setItem('writeai_stats', JSON.stringify(stats));
+  updateStats();
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div'); t.className = 'toast';
+  t.textContent = msg;
+  if (type === 'error') { t.style.background = 'var(--accent2)'; t.style.color = '#fff'; }
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+</script>
+</body>
+</html>
